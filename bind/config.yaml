@@ -1,0 +1,18 @@
+name: "Bind"
+version: "9.18"
+slug: "bind"
+description: "ISC Bind"
+url: "https://github.com/cmsj/addon-bind"
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+ports:
+  53/udp: 53
+  53/tcp: 53
+map:
+  - config:rw
+image: ghcr.io/cmsj/addon-bind/{arch}-addon-bind
+watchdog: tcp://[HOST]:[PORT:53]

@@ -15,4 +15,3 @@ ports:
 map:
   - config:rw
 image: ghcr.io/cmsj/addon-bind/{arch}-addon-bind
-watchdog: tcp://[HOST]:[PORT:53]

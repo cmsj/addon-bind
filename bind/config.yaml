@@ -1,5 +1,5 @@
 name: "Bind"
-version: "9.18-1"
+version: "9.18-2"
 slug: "bind"
 description: "ISC Bind"
 url: "https://github.com/cmsj/addon-bind"

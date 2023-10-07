@@ -2,7 +2,7 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-RUN apk update ; apk add bind
+RUN apk add --no-cache bind
 
 # Copy root filesystem
 COPY rootfs /

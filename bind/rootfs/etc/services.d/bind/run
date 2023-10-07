@@ -4,10 +4,25 @@
 # s6-overlay docs: https://github.com/just-containers/s6-overlay
 # ==============================================================================
 
-mkdir -p /data/cache
+if [ ! -d /data/cache ]; then
+    bashio::log.info "Creating cache folder"
+    mkdir -p /data/cache
+    chown named:named /data/cache
+    chmod 755 /data/cache
+fi
+
 if [ ! -f /data/named.conf ]; then
+    bashio::log.info "Creating default named.conf"
     cp /etc/named.conf /data/named.conf
+    chmod 644 /data/named.conf
+fi
+
+if [ ! -d /data/zones ]; then
+    bashio::log.info "Creating zones folder"
+    mkdir -p /data/zones
+    chown named:named /data/zones
+    chmod 755 /data/zones
 fi
 
 ## Run your program
-exec /usr/sbin/named -g -c /data/named.conf
+exec /usr/sbin/named -g -c /data/named.conf -u named

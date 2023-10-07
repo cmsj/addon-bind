@@ -4,5 +4,7 @@
 # s6-overlay docs: https://github.com/just-containers/s6-overlay
 # ==============================================================================
 
+mkdir -p /data/cache
+
 ## Run your program
-exec /usr/sbin/named -f
+exec /usr/sbin/named -g

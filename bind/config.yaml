@@ -9,6 +9,7 @@ arch:
   - aarch64
   - amd64
   - i386
+init: false
 ports:
   53/udp: 53
   53/tcp: 53

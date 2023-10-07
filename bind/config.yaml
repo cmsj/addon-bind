@@ -14,4 +14,4 @@ ports:
   53/tcp: 53
 map:
   - config:rw
-image: ghcr.io/cmsj/addon-bind/{arch}-addon-bind
+image: ghcr.io/cmsj/{arch}-addon-bind

@@ -1,7 +1,7 @@
 name: "Bind DNS Server"
-version: "9.18-5"
+version: "9.18-6"
 slug: "bind"
-description: "ISC Bind"
+description: "A fully featured DNS server"
 url: "https://github.com/cmsj/addon-bind"
 arch:
   - armhf
@@ -16,3 +16,4 @@ ports:
 map:
   - config:rw
 image: ghcr.io/cmsj/{arch}-addon-bind
+codenotary: cmsj@tenshu.net

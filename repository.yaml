@@ -1,4 +1,4 @@
 # https://developers.home-assistant.io/docs/add-ons/repository#repository-configuration
-name: Home Assistant Bind add-on repository
+name: ISC Bind Add-on
 url: 'https://github.com/cmsj/addon-bind'
 maintainer: Chris Jones <cmsj@tenshu.net>

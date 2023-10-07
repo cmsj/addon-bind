@@ -5,6 +5,9 @@
 # ==============================================================================
 
 mkdir -p /data/cache
+if [ ! -f /data/named.conf ]; then
+    cp /etc/named.conf /data/named.conf
+fi
 
 ## Run your program
-exec /usr/sbin/named -g
+exec /usr/sbin/named -g -c /data/named.conf

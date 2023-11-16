@@ -1,8 +1,8 @@
-name: Bind DNS Server
-version: 2023111623101700000000
-slug: bind
-description: A fully featured DNS server
-url: https://github.com/cmsj/addon-bind
+name: "Bind DNS Server"
+version: "20231116231500"
+slug: "bind"
+description: "A fully featured DNS server"
+url: "https://github.com/cmsj/addon-bind"
 arch:
   - armhf
   - armv7

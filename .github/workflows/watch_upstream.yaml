@@ -34,11 +34,16 @@ jobs:
         id: git-check
         run: echo "modified=$([ -z "$(git status --porcelain)" ] && echo "false" || echo "true")" >> $GITHUB_OUTPUT
 
+      - name: Get date for version number
+        id: version-date
+        if: steps.git-check.outputs.modified == 'true'
+        run: echo "versiondate=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+
       - name: Update add-on version number
         uses: mikefarah/yq@master
         if: steps.git-check.outputs.modified == 'true'
         with:
-          cmd: yq -i ".version = \"$(date +%Y%m%d%H%M%S)\"" bind/config.yaml
+          cmd: yq -i ".version = '${{ steps.version-date.outputs.versiondate}}'" bind/config.yaml
 
       - name: Commit latest release version
         if: steps.git-check.outputs.modified == 'true'

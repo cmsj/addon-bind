@@ -1,0 +1,43 @@
+name: Check dependency versions
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 05 * * *'
+jobs:
+  check-dependency-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.REPO_SCOPED_TOKEN }}
+
+      - name: Install jq
+        run: sudo apt-get install jq
+
+      - name: Install yq
+        run: sudo pip install yq
+
+      - name: Extract our target base image name/label
+        id: base_image
+        run: echo "label=$(cat bind/build.yaml | yq -r .build_from.amd64)" >> $GITHUB_OUTPUT
+
+      - name: Ensure we have the latest version of our base image
+        run: sudo docker pull ${{ steps.base_image.outputs.label }}
+
+      - name: Capture base image hash
+        run: docker images ${{ steps.base_image.outputs.label }} >upstream_docker_version.txt
+
+      - name: Capture package dependency versions
+        run: sudo docker run --rm ${{ steps.base_image.outputs.label }} bash -c "apk add bind | grep Installing" >upstream_latest_release.txt
+
+      - name: Check for modified files
+        id: git-check
+        run: echo "modified=$([ -z "$(git status --porcelain)" ] && echo "false" || echo "true")" >> $GITHUB_OUTPUT
+
+      - name: Commit latest release version
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git commit -am "New upstream release"
+          git push

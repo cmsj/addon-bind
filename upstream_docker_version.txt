@@ -1,0 +1,2 @@
+REPOSITORY                          TAG       IMAGE ID       CREATED       SIZE
+ghcr.io/home-assistant/amd64-base   latest    4033039eb054   3 weeks ago   84.6MB

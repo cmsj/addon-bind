@@ -36,7 +36,7 @@ jobs:
 
       - name: Update add-on version number
         if: steps.git-check.outputs.modified == 'true'
-        run: yq -i ".version = $(date +%Y%m%d%H%M%s)" bind/config.yaml
+        run: yq -y -i ".version = $(date +%Y%m%d%H%M%s)" bind/config.yaml
 
       - name: Commit latest release version
         if: steps.git-check.outputs.modified == 'true'

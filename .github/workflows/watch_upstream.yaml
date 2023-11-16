@@ -43,7 +43,7 @@ jobs:
         uses: mikefarah/yq@master
         if: steps.git-check.outputs.modified == 'true'
         with:
-          cmd: yq -i ''.version = "${{ steps.version-date.outputs.versiondate}}"'' bind/config.yaml
+          cmd: yq -i '.version = "${{ steps.version-date.outputs.versiondate}}"' 'bind/config.yaml'
 
       - name: Commit latest release version
         if: steps.git-check.outputs.modified == 'true'

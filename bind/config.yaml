@@ -1,5 +1,5 @@
 name: "Bind DNS Server"
-version: "20231120050604"
+version: "20231127050609"
 slug: "bind"
 description: "A fully featured DNS server"
 url: "https://github.com/cmsj/addon-bind"

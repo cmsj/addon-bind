@@ -1,2 +1,2 @@
 REPOSITORY                          TAG       IMAGE ID       CREATED       SIZE
-ghcr.io/home-assistant/amd64-base   latest    75c2208b90c6   12 days ago   42.2MB
+ghcr.io/home-assistant/amd64-base   latest    75c2208b90c6   13 days ago   42.2MB

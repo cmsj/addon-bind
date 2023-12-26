@@ -25,7 +25,7 @@ jobs:
         run: sudo docker pull ${{ steps.base_image.outputs.label }}
 
       - name: Capture base image hash
-        run: docker images ${{ steps.base_image.outputs.label }} >upstream_docker_version.txt
+        run: docker images --format '{{.Repository}} {{.Tag}} {{.ID}}' ${{ steps.base_image.outputs.label }} >upstream_docker_version.txt
 
       - name: Capture package dependency versions
         run: sudo docker run --rm ${{ steps.base_image.outputs.label }} bash -c "apk add bind | grep Installing" >upstream_latest_release.txt

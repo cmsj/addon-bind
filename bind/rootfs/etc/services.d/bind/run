@@ -12,18 +12,18 @@ if [ ! -d /data/cache ]; then
     chmod 755 /data/cache
 fi
 
-if [ ! -f /data/named.conf ]; then
+if [ ! -f /config/named.conf ]; then
     bashio::log.info "Creating default named.conf"
-    cp /etc/named.conf /data/named.conf
-    chmod 644 /data/named.conf
+    cp /etc/named.conf /config/named.conf
+    chmod 644 /config/named.conf
 fi
 
-if [ ! -d /data/zones ]; then
+if [ ! -d /config/zones ]; then
     bashio::log.info "Creating zones folder"
-    mkdir -p /data/zones
-    chown named:named /data/zones
-    chmod 755 /data/zones
+    mkdir -p /config/zones
+    chown named:named /config/zones
+    chmod 755 /config/zones
 fi
 
 ## Run your program
-exec /usr/sbin/named -g -c /data/named.conf -u named
+exec /usr/sbin/named -g -c /config/named.conf -u named

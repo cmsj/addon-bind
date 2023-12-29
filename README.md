@@ -1,4 +1,4 @@
-# ISC Bind DNS server add-on for Home Assistant
+# (Unofficial) ISC Bind DNS server add-on for Home Assistant
 
 [![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fcmsj%2Faddon-bind)
 
@@ -20,13 +20,13 @@ You should think very carefully about whether you actually want an open recursiv
 
 Note: bind runs as the `named` user.
 
-The add-on expects to use `/data` for all of its persistent data. There are various ways you can interact with this in Home Assistant (e.g. an SSH addon) if you wish to configure Bind further (e.g. to make it authoritative). The default layout of `/data` is:
+The add-on expects to use `/addon_configs/de554ef4_bind` for `named.conf` and `zones/`, and `/data` for its cache files. There are various ways you can interact with this in Home Assistant (e.g. an SSH addon) if you wish to configure Bind further (e.g. to make it authoritative). The default layout is:
 
 | Path  | Type | Owner | Permissions | Purpose |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
-| `named.conf`  | File  | `root` | `rw-r--r--` | Main onfig file |
-| `cache/` | Directory | `named` | `rwxr-xr-x` | Cache directory |
-| `zones/` | Directory | `named` | `rwxr-xr-x` | (Optional) location for zone files |
+| `/addon_configs/de554ef4_bind/named.conf`  | File  | `root` | `rw-r--r--` | Main onfig file |
+| `/mnt/data/supervisor/addons/data/de554ef4_bind/cache/` | Directory | `named` | `rwxr-xr-x` | Cache directory |
+| `/addon_configs/de554ef4_bind/zones/` | Directory | `named` | `rwxr-xr-x` | (Optional) location for zone files |
 
 
 

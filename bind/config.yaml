@@ -18,4 +18,4 @@ map:
 image: ghcr.io/cmsj/{arch}-addon-bind
 codenotary: cmsj@tenshu.net
 backup_exclude:
-  - '*/data/cache/*'
+  - '*/cache'

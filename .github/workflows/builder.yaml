@@ -112,7 +112,7 @@ jobs:
 #             --image "${{ steps.check.outputs.image }}" \
 
       - name: Delete old images
-        uses: actions/delete-package-versions@v4
+        uses: actions/delete-package-versions@v5
         with:
           package-name: '${{ matrix.arch }}-addon-${{ matrix.addon }}'
           package-type: 'container'

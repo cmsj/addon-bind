@@ -1,1 +1,1 @@
-ghcr.io/home-assistant/amd64-base latest 1341dd8f8144
+ghcr.io/home-assistant/amd64-base latest e3e425783936

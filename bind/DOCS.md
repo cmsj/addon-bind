@@ -10,10 +10,10 @@ You should think very carefully about whether you actually want an open recursiv
 
 Note: bind runs as the `named` user.
 
-The add-on expects to use `/data` for all of its persistent data. There are various ways you can interact with this in Home Assistant (e.g. an SSH addon) if you wish to configure Bind further (e.g. to make it authoritative). The default layout of `/data` is:
+The add-on expects to use `/config` for all of its persistent data, and `/data` for its temporary caches. There are various ways you can interact with this in Home Assistant (e.g. an SSH addon) if you wish to configure Bind further (e.g. to make it authoritative). The default layout is:
 
 | Path  | Type | Owner | Permissions | Purpose |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
-| `named.conf`  | File  | `root` | `rw-r--r--` | Main onfig file |
-| `cache/` | Directory | `named` | `rwxr-xr-x` | Cache directory |
-| `zones/` | Directory | `named` | `rwxr-xr-x` | (Optional) location for zone files |
+| `/config/named.conf`  | File  | `root` | `rw-r--r--` | Main config file |
+| `/config/zones/` | Directory | `named` | `rwxr-xr-x` | (Optional) location for zone files |
+| `/data/cache/` | Directory | `named` | `rwxr-xr-x` | Cache directory |

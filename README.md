@@ -18,17 +18,17 @@ You should think very carefully about whether you actually want an open recursiv
 
 ## Customisation
 
-Note: bind runs as the `named` user.
+Note: bind runs inside the addon's container as the `named` user.
 
-The add-on expects to use `/addon_configs/de554ef4_bind` for `named.conf` and `zones/`, and `/data` for its cache files. There are various ways you can interact with this in Home Assistant (e.g. an SSH addon) if you wish to configure Bind further (e.g. to make it authoritative). The default layout is:
+The add-on expects to use `/config` for `named.conf` and `zones/`, and `/data` for its cache files. There are various ways you can interact with this in Home Assistant (e.g. an SSH addon) if you wish to configure Bind further (e.g. to make it authoritative). The default layout is:
 
 | Path  | Type | Owner | Permissions | Purpose |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
-| `/addon_configs/de554ef4_bind/named.conf`  | File  | `root` | `rw-r--r--` | Main onfig file |
+| `/mnt/data/supervisor/addon_configs/de554ef4_bind/named.conf`  | File  | `root` | `rw-r--r--` | Main config file |
+| `/mnt/data/supervisor/addon_configs/de554ef4_bind/zones/` | Directory | `named` | `rwxr-xr-x` | (Optional) location for zone files |
 | `/mnt/data/supervisor/addons/data/de554ef4_bind/cache/` | Directory | `named` | `rwxr-xr-x` | Cache directory |
-| `/addon_configs/de554ef4_bind/zones/` | Directory | `named` | `rwxr-xr-x` | (Optional) location for zone files |
 
-
+Depending on how you access files on your Home Assistant install, these paths may actually be accessible via `/addon_configs`/`/addons` or directly as `/config`/`/data`
 
 
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg

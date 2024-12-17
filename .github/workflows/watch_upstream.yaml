@@ -49,6 +49,10 @@ jobs:
         if: steps.git-check.outputs.modified == 'true'
         run: echo "${{ steps.version-date.outputs.versiondate }}" >VERSION
 
+      - name: Generate changelog
+        if: steps.git-check.outputs.modified == 'true'
+        run: ./update_changelog.sh
+
       - name: Commit latest release version
         if: steps.git-check.outputs.modified == 'true'
         run: |

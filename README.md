@@ -28,7 +28,7 @@ The add-on expects to use `/config` for `named.conf` and `zones/`, and `/data` f
 | `/mnt/data/supervisor/addon_configs/de554ef4_bind/zones/` | Directory | `named` | `rwxr-xr-x` | (Optional) location for zone files |
 | `/mnt/data/supervisor/addons/data/de554ef4_bind/cache/` | Directory | `named` | `rwxr-xr-x` | Cache directory |
 
-Depending on how you access files on your Home Assistant install, these paths may actually be accessible via `/addon_configs`/`/addons` or directly as `/config`/`/data`
+Depending on how you access files on your Home Assistant install, these paths may actually be accessible via `/addon_configs`/`/addons/data` or directly as `/config`/`/data`
 
 
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg

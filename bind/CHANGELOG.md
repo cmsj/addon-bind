@@ -1,8 +1,8 @@
 # Version information
 
- * Addon version: 20250130050706
+ * Addon version: 20250215050620
  * BIND version: 9.18.33-r0
- * Home Assistant Add-on base image version: c4e597896608
+ * Home Assistant Add-on base image version: 02312a3ba918
 
 Dependencies:
  * bind-dnssec-root (9.18.33-r0)

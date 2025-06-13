@@ -1,8 +1,8 @@
 # Version information
 
- * Addon version: 20250611050847
+ * Addon version: 20250613050801
  * BIND version: 9.20.9-r0
- * Home Assistant Add-on base image version: 68e0fdf8bca9
+ * Home Assistant Add-on base image version: d7ab6ca07867
 
 Dependencies:
  * dns-root-hints (2024021501-r0)

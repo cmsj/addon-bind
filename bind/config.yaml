@@ -1,5 +1,5 @@
 name: "Bind DNS Server"
-version: "20250613050801"
+version: "20250619050855"
 slug: "bind"
 description: "A fully featured DNS server. Please note: This addon is not provided by Internet Systems Consortium, it is a third party addon"
 url: "https://github.com/cmsj/addon-bind"

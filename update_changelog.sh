@@ -17,7 +17,7 @@ DEPS=$(cat "${DEPS_DATA}" | grep -v " bind " | sed -e 's/.*Installing / \* /g' |
 
 OLD_BINDVER=$(cat "${CHANGELOG}" | grep "BIND version" | sed -e 's/^ \* BIND version: //')
 OLD_BASEVER=$(cat "${CHANGELOG}" | grep "base image version" | sed -e 's/^.* image version: //')
-OLD_DEPS=$(cat "${CHANGELOG}" | sed '0,/^Dependencies:$/d')
+OLD_DEPS=$(cat "${CHANGELOG}" | sed '1,/^Dependencies:$/d')
 
 #echo -n "" >"${CHANGELOG}"
 {
@@ -49,6 +49,10 @@ OLD_DEPS=$(cat "${CHANGELOG}" | sed '0,/^Dependencies:$/d')
     echo ""
     echo "Dependencies:"
 
+    # Arrays to track processed dependencies
+    declare -a processed_old_deps=()
+    declare -a removed_deps=()
+
     # Process each dependency to show version changes
     while IFS= read -r dep; do
         if [ -n "$dep" ]; then
@@ -66,12 +70,42 @@ OLD_DEPS=$(cat "${CHANGELOG}" | sed '0,/^Dependencies:$/d')
                 else
                     echo " * $pkg_name: $pkg_version (unchanged)"
                 fi
+                # Mark this old dependency as processed
+                processed_old_deps+=("$pkg_name")
             else
                 # New dependency
                 echo " * $pkg_name: $pkg_version (new)"
             fi
         fi
     done <<< "$DEPS"
+
+    # Check for removed dependencies
+    while IFS= read -r old_dep; do
+        if [ -n "$old_dep" ]; then
+            old_pkg_name=$(echo "$old_dep" | sed -e 's/ \* \([^(]*\) (.*)/\1/')
+            old_pkg_version=$(echo "$old_dep" | sed -e 's/.*(\([^)]*\))/\1/')
+            
+            # Check if this old dependency is not in the processed list
+            found=false
+            for processed in "${processed_old_deps[@]}"; do
+                if [ "$processed" = "$old_pkg_name" ]; then
+                    found=true
+                    break
+                fi
+            done
+            
+            if [ "$found" = false ]; then
+                removed_deps+=("$old_pkg_name:$old_pkg_version")
+            fi
+        fi
+    done <<< "$OLD_DEPS"
+
+    # Report removed dependencies
+    for removed in "${removed_deps[@]}"; do
+        pkg_name=$(echo "$removed" | cut -d: -f1)
+        pkg_version=$(echo "$removed" | cut -d: -f2)
+        echo " * $pkg_name: $pkg_version (removed)"
+    done
 }
 #>> "${CHANGELOG}"
 

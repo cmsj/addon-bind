@@ -19,9 +19,7 @@ OLD_BINDVER=$(cat "${CHANGELOG}" | grep "BIND version" | sed -e 's/^ \* BIND ver
 OLD_BASEVER=$(cat "${CHANGELOG}" | grep "base image version" | sed -e 's/^.* image version: //')
 OLD_DEPS=$(cat "${CHANGELOG}" | sed '0,/^Dependencies:$/d')
 
-echo "Old: ${OLD_BINDVER} New ${BINDVER}"
-
-echo -n "" >"${CHANGELOG}"
+#echo -n "" >"${CHANGELOG}"
 {
     if [ -e "${BREAKING}" ]; then
         echo "# Breaking change"
@@ -51,6 +49,29 @@ echo -n "" >"${CHANGELOG}"
     echo ""
     echo "Dependencies:"
 
-    echo "${DEPS}"
-} >> "${CHANGELOG}"
+    # Process each dependency to show version changes
+    while IFS= read -r dep; do
+        if [ -n "$dep" ]; then
+            # Extract package name and version from current dependency
+            # Format is "* package_name (version)"
+            pkg_name=$(echo "$dep" | sed -e 's/ \* \([^(]*\) (.*)/\1/')
+            pkg_version=$(echo "$dep" | sed -e 's/.*(\([^)]*\))/\1/')
+            
+            # Find corresponding old version
+            old_dep_line=$(echo "$OLD_DEPS" | grep " \* $pkg_name (")
+            if [ -n "$old_dep_line" ]; then
+                old_version=$(echo "$old_dep_line" | sed -e 's/.*(\([^)]*\))/\1/')
+                if [ "$old_version" != "$pkg_version" ]; then
+                    echo " * $pkg_name: $old_version -> $pkg_version"
+                else
+                    echo " * $pkg_name: $pkg_version (unchanged)"
+                fi
+            else
+                # New dependency
+                echo " * $pkg_name: $pkg_version (new)"
+            fi
+        fi
+    done <<< "$DEPS"
+}
+#>> "${CHANGELOG}"
 

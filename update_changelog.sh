@@ -19,7 +19,7 @@ OLD_BINDVER=$(cat "${CHANGELOG}" | grep "BIND version" | sed -e 's/^ \* BIND ver
 OLD_BASEVER=$(cat "${CHANGELOG}" | grep "base image version" | sed -e 's/^.* image version: //')
 OLD_DEPS=$(cat "${CHANGELOG}" | sed '1,/^Dependencies:$/d')
 
-#echo -n "" >"${CHANGELOG}"
+echo -n "" >"${CHANGELOG}"
 {
     if [ -e "${BREAKING}" ]; then
         echo "# Breaking change"
@@ -63,7 +63,7 @@ OLD_DEPS=$(cat "${CHANGELOG}" | sed '1,/^Dependencies:$/d')
             # Format is "* package_name (version)"
             pkg_name=$(echo "$dep" | sed -e 's/ \* \([^(]*\) (.*)/\1/')
             pkg_version=$(echo "$dep" | sed -e 's/.*(\([^)]*\))/\1/')
-            
+
             # Find corresponding old version
             old_dep_line=$(echo "$OLD_DEPS" | grep " \* $pkg_name (")
             if [ -n "$old_dep_line" ]; then
@@ -104,26 +104,30 @@ OLD_DEPS=$(cat "${CHANGELOG}" | sed '1,/^Dependencies:$/d')
     done <<< "$OLD_DEPS"
 
     # Report changed dependencies
-    for changed in "${changed_deps[@]}"; do
-        pkg_name=$(echo "$changed" | cut -d: -f1)
-        old_version=$(echo "$changed" | cut -d: -f2)
-        new_version=$(echo "$changed" | cut -d: -f3)
-        echo " * $pkg_name: $old_version -> $new_version"
-    done
+    if [ ${#changed_deps[@]} -gt 0 ] || [ ${#new_deps[@]} -gt 0 ] || [ ${#removed_deps[@]} -gt 0 ]; then
+        for changed in "${changed_deps[@]}"; do
+            pkg_name=$(echo "$changed" | cut -d: -f1)
+            old_version=$(echo "$changed" | cut -d: -f2)
+            new_version=$(echo "$changed" | cut -d: -f3)
+            echo " * $pkg_name: $old_version -> $new_version"
+        done
 
-    # Report new dependencies
-    for new in "${new_deps[@]}"; do
-        pkg_name=$(echo "$new" | cut -d: -f1)
-        pkg_version=$(echo "$new" | cut -d: -f2)
-        echo " * $pkg_name: $pkg_version (new)"
-    done
+        # Report new dependencies
+        for new in "${new_deps[@]}"; do
+            pkg_name=$(echo "$new" | cut -d: -f1)
+            pkg_version=$(echo "$new" | cut -d: -f2)
+            echo " * $pkg_name: $pkg_version (new)"
+        done
 
-    # Report removed dependencies
-    for removed in "${removed_deps[@]}"; do
-        pkg_name=$(echo "$removed" | cut -d: -f1)
-        pkg_version=$(echo "$removed" | cut -d: -f2)
-        echo " * $pkg_name: $pkg_version (removed)"
-    done
+        # Report removed dependencies
+        for removed in "${removed_deps[@]}"; do
+            pkg_name=$(echo "$removed" | cut -d: -f1)
+            pkg_version=$(echo "$removed" | cut -d: -f2)
+            echo " * $pkg_name: $pkg_version (removed)"
+        done
+    else
+        echo " * None"
+    fi
 
     # Report unchanged dependencies (if any)
     if [ ${#unchanged_deps[@]} -gt 0 ]; then
@@ -134,7 +138,10 @@ OLD_DEPS=$(cat "${CHANGELOG}" | sed '1,/^Dependencies:$/d')
             pkg_version=$(echo "$unchanged" | cut -d: -f2)
             echo " * $pkg_name: $pkg_version"
         done
+    else
+        echo ""
+        echo "Unchanged Dependencies:"
+        echo " * None"
     fi
-}
-#>> "${CHANGELOG}"
+} >> "${CHANGELOG}"
 

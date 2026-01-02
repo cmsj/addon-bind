@@ -3,7 +3,7 @@
 ( 3/11) Installing libbz2 (1.0.8-r6)
 ( 4/11) Installing libgcrypt (1.11.2-r0)
 ( 5/11) Installing npth (1.8-r0)
-( 6/11) Installing gpgv (2.4.8-r1)
+( 6/11) Installing gpgv (2.4.9-r0)
 ( 7/11) Installing dns-root-hints (2024021501-r0)
 (10/11) Installing libcap2 (2.77-r0)
 (11/11) Installing bind (9.20.17-r0)

@@ -13,6 +13,5 @@ ports:
 map:
   - addon_config:rw
 image: ghcr.io/cmsj/{arch}-addon-bind
-codenotary: cmsj@tenshu.net
 backup_exclude:
   - '*/cache'

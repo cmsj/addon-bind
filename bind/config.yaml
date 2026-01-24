@@ -4,11 +4,8 @@ slug: "bind"
 description: "A fully featured DNS server. Please note: This addon is not provided by Internet Systems Consortium, it is a third party addon"
 url: "https://github.com/cmsj/addon-bind"
 arch:
-  - armhf
-  - armv7
   - aarch64
   - amd64
-  - i386
 init: false
 ports:
   53/udp: 53

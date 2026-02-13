@@ -1,5 +1,5 @@
 BIND_VERSION=9.20.18-r0
-BASE_IMAGE=8bf686912750
+BASE_IMAGE=65dde5f12bb5
 DEP:dns-root-hints=2024021501-r0
 DEP:gpgv=2.4.9-r0
 DEP:libassuan=3.0.2-r0

@@ -1,11 +1,7 @@
 name: Builder
 
 env:
-  BUILD_ARGS: "--test"
-  MONITORED_FILES: "build.yaml config.yaml Dockerfile rootfs VERSION"
-  ARCHITECTURES: '["amd64", "aarch64"]'
-  IMAGE_NAME: "addon-bind"
-  ADDON_DIR: "bind"
+  MONITORED_FILES: "build.yaml config.yaml Dockerfile rootfs"
 
 on:
   push:
@@ -20,42 +16,55 @@ permissions:
 
 jobs:
   init:
-    runs-on: ubuntu-latest
     name: Initialize builds
+    runs-on: ubuntu-latest
     outputs:
-      changed: ${{ steps.monitored_files.outputs.changed }}
-      matrix: ${{ steps.matrix.outputs.matrix }}
+      changed: ${{ steps.filter.outputs.changed }}
+      changed_apps: ${{ steps.filter.outputs.changed_apps }}
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.0
 
       - name: Get changed files
         id: changed_files
-        uses: jitterbit/get-changed-files@v1
+        uses: tj-actions/changed-files@v47
 
-      - name: Check monitored files
-        id: monitored_files
+      - name: Find app directories
+        id: apps
+        uses: home-assistant/actions/helpers/find-addons@master
+
+      - name: Filter changed apps
+        id: filter
+        env:
+          APPS: ${{ steps.apps.outputs.addons }}
+          CHANGED_FILES: ${{ steps.changed_files.outputs.all_changed_files }}
         run: |
-          for file in ${{ env.MONITORED_FILES }}; do
-              if [[ "${{ steps.changed_files.outputs.all }}" =~ ${{ env.ADDON_DIR }}/$file ]]; then
-                echo "Detected a change in a monitored file: ${{ env.ADDON_DIR }}/$file"
-                echo "changed=true" >> $GITHUB_OUTPUT
-                exit 0
-              fi
-          done
-          echo "Add-on had no monitored files changed (${{ env.MONITORED_FILES }})";
+          changed_apps=()
 
-      - name: Get build matrix
-        id: matrix
-        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.06.0
-        with:
-          architectures: ${{ env.ARCHITECTURES }}
-          image-name: ${{ env.IMAGE_NAME }}
+          # If a workflow file changed, rebuild all apps
+          if [[ "${CHANGED_FILES}" =~ \.github/workflows/(builder|build-app)\.yaml ]]; then
+            changed_apps=(${APPS})
+          else
+            for app in ${APPS}; do
+              for file in ${MONITORED_FILES}; do
+                if [[ "${CHANGED_FILES}" =~ ${app}/${file} ]]; then
+                  changed_apps+=("${app}")
+                  break
+                fi
+              done
+            done
+          fi
 
-  build:
-    name: Build ${{ matrix.arch }} image
+          if [[ ${#changed_apps[@]} -gt 0 ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "changed_apps=$(jq -nc '$ARGS.positional' --args "${changed_apps[@]}")" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-app:
+    name: Build ${{ matrix.app }}
     needs: init
-    runs-on: ${{ matrix.os }}
     if: needs.init.outputs.changed == 'true'
     permissions:
       contents: read
@@ -63,65 +72,10 @@ jobs:
       packages: write
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
-    outputs:
-      image_tag: ${{ steps.image_tag.outputs.image_tag }}
-      info: ${{ steps.info.outputs }}
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
-      - name: Get information
-        id: info
-        uses: home-assistant/actions/helpers/info@master
-        with:
-          path: "./${{ env.ADDON_DIR }}"
-
-      - name: Extract image tag
-        id: image_tag
-        env:
-            IMAGE_TAG: "${{ steps.info.outputs.version }}"
-        run: |
-          IMAGE_TAG=${{ env.IMAGE_TAG }}
-          IMAGE_TAG=${IMAGE_TAG//\"/}
-          echo IMAGE_TAG=${IMAGE_TAG} >> $GITHUB_ENV # update GitHub ENV vars
-          echo "image_tag=${IMAGE_TAG}"
-
-      - name: Build image
-        uses: home-assistant/builder/actions/build-image@2026.06.0
-        with:
-          arch: ${{ matrix.arch }}
-          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
-          image: ${{ matrix.image }}
-          image-tags: |
-            ${{ env.IMAGE_TAG }}
-            latest
-          push: "true"
-          version: ${{ steps.info.outputs.version }}
-
-  manifest:
-    name: Publish multi-arch manifest
-    needs: [init, build]
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write # Write needed for Cosign signing (issue OIDC token for signing)
-      packages: write # To push the manifest to GitHub Container Registry
-    steps:
-      - name: Publish multi-arch manifest
-        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.06.0
-        with:
-          architectures: ${{ env.ARCHITECTURES }}
-          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
-          image-name: ${{ env.IMAGE_NAME }}
-          image-tags: |
-            ${{ needs.build.outputs.image_tag.image_tag }}
-            latest
-
-      - name: Delete old images
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: '${{ matrix.arch }}-addon-${{ env.ADDON_DIR }}'
-          package-type: 'container'
-          min-versions-to-keep: 5
-
+      matrix:
+        app: ${{ fromJSON(needs.init.outputs.changed_apps) }}
+    uses: ./.github/workflows/build-app.yaml
+    with:
+      app: ${{ matrix.app }}
+      publish: ${{ github.event_name == 'push' }}
+    secrets: inherit

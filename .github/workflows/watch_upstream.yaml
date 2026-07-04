@@ -45,10 +45,6 @@ jobs:
         with:
           cmd: yq -i '.version = "${{ steps.version-date.outputs.versiondate }}"' 'bind/config.yaml'
 
-      - name: Capture version number
-        if: steps.git-check.outputs.modified == 'true'
-        run: echo "${{ steps.version-date.outputs.versiondate }}" >VERSION
-
       - name: Generate changelog
         if: steps.git-check.outputs.modified == 'true'
         run: ./update_changelog.sh

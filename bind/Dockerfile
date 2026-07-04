@@ -23,7 +23,7 @@ RUN apk add --no-cache bind bind-plugins
 COPY rootfs /
 
 LABEL \
-      org.opencontainers.image.title: "Home Assistant Add-on: ISC Bind"
-      org.opencontainers.image.description: "Bind DNS server"
-      org.opencontainers.image.source: "https://github.com/cmsj/addon-bind"
+      org.opencontainers.image.title: "Home Assistant Add-on: ISC Bind" \
+      org.opencontainers.image.description: "Bind DNS server" \
+      org.opencontainers.image.source: "https://github.com/cmsj/addon-bind" \
       org.opencontainers.image.licenses: "Apache License 2.0"

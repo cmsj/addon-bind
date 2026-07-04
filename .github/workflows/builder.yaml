@@ -64,6 +64,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+    outputs:
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+      info: ${{ steps.info.outputs }}
 
     steps:
       - name: Check out repository
@@ -75,6 +78,16 @@ jobs:
         with:
           path: "./${{ env.ADDON_DIR }}"
 
+      - name: Extract image tag
+        id: image_tag
+        env:
+            IMAGE_TAG: "${{ steps.info.outputs.version }}"
+        run: |
+          IMAGE_TAG=${{ env.IMAGE_TAG }}
+          IMAGE_TAG=${IMAGE_TAG//\"/}
+          echo IMAGE_TAG=${IMAGE_TAG} >> $GITHUB_ENV # update GitHub ENV vars
+          echo "image_tag=${IMAGE_TAG}"
+
       - name: Build image
         uses: home-assistant/builder/actions/build-image@2026.06.0
         with:
@@ -82,7 +95,7 @@ jobs:
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image: ${{ matrix.image }}
           image-tags: |
-            ${{ steps.info.outputs.version }}
+            ${{ env.IMAGE_TAG }}
             latest
           push: "true"
           version: ${{ steps.info.outputs.version }}
@@ -102,7 +115,7 @@ jobs:
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image-name: ${{ env.IMAGE_NAME }}
           image-tags: |
-            ${{ needs.build.outputs.info.version }}
+            ${{ needs.build.outputs.image_tag.image_tag }}
             latest
 
       - name: Delete old images

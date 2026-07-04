@@ -6,3 +6,4 @@ RUN apk add --no-cache bind bind-plugins
 
 # Copy root filesystem
 COPY rootfs /
+

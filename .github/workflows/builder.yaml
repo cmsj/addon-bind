@@ -36,19 +36,14 @@ jobs:
       - name: Check monitored files
         id: monitored_files
         run: |
-          RUN_BUILD="no"
-
           for file in ${{ env.MONITORED_FILES }}; do
               if [[ "${{ steps.changed_files.outputs.all }}" =~ ${{ env.ADDON_DIR }}/$file ]]; then
-                RUN_BUILD="yes"
+                echo "Detected a change in a monitored file: ${{ env.ADDON_DIR }}/$file"
+                echo "changed=true" >> $GITHUB_OUTPUT
+                exit 0
               fi
           done
-
-          if [[ "$RUN_BUILD" == "yes" ]]; then
-            echo "changed=true" >> $GITHUB_OUTPUT;
-          else
-            echo "Add-on had no monitored files changed (${{ env.MONITORED_FILES }})";
-          fi
+          echo "Add-on had no monitored files changed (${{ env.MONITORED_FILES }})";
 
       - name: Get build matrix
         id: matrix

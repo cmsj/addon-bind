@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Initialize builds
     outputs:
-      changed: ${{ steps.changed_addons.outputs.changed }}
+      changed: ${{ steps.monitored_files.outputs.changed }}
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - name: Check out the repository
@@ -56,7 +56,7 @@ jobs:
     name: Build ${{ matrix.arch }} image
     needs: init
     runs-on: ${{ matrix.os }}
-    if: needs.init.outputs.monitored_files.changed == 'true'
+    if: needs.init.outputs.changed == 'true'
     permissions:
       contents: read
       id-token: write

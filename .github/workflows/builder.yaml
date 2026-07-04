@@ -3,6 +3,9 @@ name: Builder
 env:
   BUILD_ARGS: "--test"
   MONITORED_FILES: "build.yaml config.yaml Dockerfile rootfs VERSION"
+  ARCHITECTURES: '["amd64", "aarch64"]'
+  IMAGE_NAME: "addon-bind"
+  ADDON_DIR: "bind"
 
 on:
   push:
@@ -12,13 +15,16 @@ on:
     branches:
       - main
 
+permissions:
+  content: read
+
 jobs:
   init:
     runs-on: ubuntu-latest
     name: Initialize builds
     outputs:
-      changed_addons: ${{ steps.changed_addons.outputs.addons }}
       changed: ${{ steps.changed_addons.outputs.changed }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v7
@@ -27,44 +33,42 @@ jobs:
         id: changed_files
         uses: jitterbit/get-changed-files@v1
 
-      - name: Find add-on directories
-        id: addons
-        uses: home-assistant/actions/helpers/find-addons@master
-
-      - name: Get changed add-ons
-        id: changed_addons
+      - name: Check monitored files
+        id: monitored_files
         run: |
-          declare -a changed_addons
-          for addon in ${{ steps.addons.outputs.addons }}; do
-            if [[ "${{ steps.changed_files.outputs.all }}" =~ $addon ]]; then
-              for file in ${{ env.MONITORED_FILES }}; do
-                  if [[ "${{ steps.changed_files.outputs.all }}" =~ $addon/$file ]]; then
-                    if [[ ! "${changed_addons[@]}" =~ $addon ]]; then
-                      changed_addons+=("\"${addon}\",");
-                    fi
-                  fi
-              done
-            fi
+          RUN_BUILD="no"
+
+          for file in ${{ env.MONITORED_FILES }}; do
+              if [[ "${{ steps.changed_files.outputs.all }}" =~ ${{ env.ADDON_DIR }}/$file ]]; then
+                RUN_BUILD="yes"
+              fi
           done
 
-          changed=$(echo ${changed_addons[@]} | rev | cut -c 2- | rev)
-
-          if [[ -n ${changed} ]]; then
-            echo "Changed add-ons: $changed";
+          if [[ "$RUN_BUILD" == "yes" ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT;
-            echo "addons=[$changed]" >> $GITHUB_OUTPUT;
           else
-            echo "No add-on had any monitored files changed (${{ env.MONITORED_FILES }})";
+            echo "Add-on had no monitored files changed (${{ env.MONITORED_FILES }})";
           fi
+
+      - name: Get build matrix
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.06.0
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          image-name: ${{ env.IMAGE_NAME }}
+
   build:
+    name: Build ${{ matrix.arch }} image
     needs: init
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     if: needs.init.outputs.changed == 'true'
-    name: Build ${{ matrix.arch }} ${{ matrix.addon }} add-on
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
     strategy:
-      matrix:
-        addon: ${{ fromJson(needs.init.outputs.changed_addons) }}
-        arch: ["aarch64", "amd64", "armhf", "armv7", "i386"]
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
 
     steps:
       - name: Check out repository
@@ -74,46 +78,42 @@ jobs:
         id: info
         uses: home-assistant/actions/helpers/info@master
         with:
-          path: "./${{ matrix.addon }}"
+          path: "./${{ env.ADDON_DIR }}"
 
-      - name: Check if add-on should be built
-        id: check
-        run: |
-          if [[ "${{ steps.info.outputs.architectures }}" =~ ${{ matrix.arch }} ]]; then
-             echo "build_arch=true" >> $GITHUB_OUTPUT;
-             echo "image=$(echo ${{ steps.info.outputs.image }} | cut -d'/' -f3)" >> $GITHUB_OUTPUT;
-             if [[ -z "${{ github.head_ref }}" ]] && [[ "${{ github.event_name }}" == "push" ]]; then
-                 echo "BUILD_ARGS=" >> $GITHUB_ENV;
-             fi
-           else
-             echo "${{ matrix.arch }} is not a valid arch for ${{ matrix.addon }}, skipping build";
-             echo "build_arch=false" >> $GITHUB_OUTPUT;
-          fi
-
-      - name: Login to GitHub Container Registry
-        if: env.BUILD_ARGS != '--test'
-        uses: docker/login-action@v4.2.0
+      - name: Build image
+        uses: home-assistant/builder/actions/build-image@2026.06.0
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          arch: ${{ matrix.arch }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image: ${{ matrix.image }}
+          image-tags: |
+            ${{ steps.info.outputs.version }}
+            latest
+          push: "true"
+          version: ${{ steps.info.outputs.version }}
 
-      - name: Build ${{ matrix.addon }} add-on
-        if: steps.check.outputs.build_arch == 'true'
-        uses: home-assistant/builder@2026.06.0
+  manifest:
+    name: Publish multi-arch manifest
+    needs: [init, build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Write needed for Cosign signing (issue OIDC token for signing)
+      packages: write # To push the manifest to GitHub Container Registry
+    steps:
+      - name: Publish multi-arch manifest
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.06.0
         with:
-          args: |
-            ${{ env.BUILD_ARGS }} \
-            --${{ matrix.arch }} \
-            --target /data/${{ matrix.addon }} \
-            --docker-hub "ghcr.io/${{ github.repository_owner }}" \
-            --addon
-
-#             --image "${{ steps.check.outputs.image }}" \
+          architectures: ${{ env.ARCHITECTURES }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image-name: ${{ env.IMAGE_NAME }}
+          image-tags: |
+            ${{ needs.build.outputs.info.version }}
+            latest
 
       - name: Delete old images
         uses: actions/delete-package-versions@v5
         with:
-          package-name: '${{ matrix.arch }}-addon-${{ matrix.addon }}'
+          package-name: '${{ matrix.arch }}-addon-${{ env.ADDON_DIR }}'
           package-type: 'container'
           min-versions-to-keep: 5
+

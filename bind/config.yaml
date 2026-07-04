@@ -12,6 +12,6 @@ ports:
   53/tcp: 53
 map:
   - addon_config:rw
-image: ghcr.io/cmsj/{arch}-addon-bind
+image: ghcr.io/cmsj/addon-bind
 backup_exclude:
   - '*/cache'

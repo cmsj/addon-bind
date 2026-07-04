@@ -17,7 +17,7 @@ RUN \
     && curl -sSLf -o /usr/bin/tempio \
         "https://github.com/home-assistant/tempio/releases/download/${TEMPIO_VERSION}/tempio_${tempio_arch}"
 
-    apk add --no-cache bind bind-plugins
+RUN apk add --no-cache bind bind-plugins
 
 # Copy root filesystem
 COPY rootfs /

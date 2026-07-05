@@ -1,6 +1,5 @@
 #!/bin/bash
 
-ADDON_DATA="VERSION"
 BASE_DATA="upstream_docker_version.txt"
 DEPS_DATA="upstream_latest_release.txt"
 CHANGELOG="bind/CHANGELOG.md"
@@ -92,7 +91,7 @@ done <<< "$OLD_DEPS"
 
     echo "# Version information"
     echo ""
-    echo " * Addon version: $(cat "${ADDON_DATA}")"
+    echo " * Addon version: $(cat bind/config.yaml | yq .version)"
 
     echo -n " * BIND version: "
     if [ -n "$OLD_BINDVER" ] && [ "$OLD_BINDVER" != "$BINDVER" ]; then

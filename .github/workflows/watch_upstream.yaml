@@ -19,7 +19,7 @@ jobs:
 
       - name: Extract our target base image name/label
         id: base_image
-        run: echo "label=$(cat bind/build.yaml | yq -r .build_from.amd64)" >> $GITHUB_OUTPUT
+        run: echo "label=$(cat bind/Dockerfile | grep "ARG BUILD_FROM" | sed -e 's/ARG BUILD_FROM=//')" >> $GITHUB_OUTPUT
 
       - name: Ensure we have the latest version of our base image
         run: sudo docker pull ${{ steps.base_image.outputs.label }}

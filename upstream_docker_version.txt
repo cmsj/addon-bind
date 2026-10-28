@@ -1,1 +1,1 @@
-ghcr.io/home-assistant/base latest ec701cad20b9
+ghcr.io/home-assistant/base latest b8ad618e4e2a

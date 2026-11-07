@@ -1,8 +1,8 @@
 # Version information
 
- * Addon version: "20261028051308"
+ * Addon version: "20261107050952"
  * BIND version: 9.20.30-r0 (unchanged)
- * Home Assistant Add-on base image version: ec701cad20b9 -> b8ad618e4e2a
+ * Home Assistant Add-on base image version: b8ad618e4e2a -> 1ea6e69c403a
 
 Changed Dependencies:
  * None
